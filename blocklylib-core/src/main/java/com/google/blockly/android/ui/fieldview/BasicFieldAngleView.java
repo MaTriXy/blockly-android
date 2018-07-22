@@ -17,12 +17,13 @@ package com.google.blockly.android.ui.fieldview;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.support.v13.view.ViewCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 
+import com.google.blockly.android.BuildConfig;
 import com.google.blockly.model.Field;
 import com.google.blockly.model.FieldAngle;
 
@@ -38,7 +39,11 @@ public class BasicFieldAngleView extends AppCompatTextView implements FieldView 
     protected Field.Observer mFieldObserver = new Field.Observer() {
         @Override
         public void onValueChanged(Field angleField, String oldValue, String newValue) {
-            assert (angleField == mAngleField);
+            if (BuildConfig.DEBUG && !(angleField == mAngleField)) {
+                throw new AssertionError(
+                        String.format("angleField (%s) must match mAngleField (%s)",
+                            angleField, mAngleField));
+            }
 
             String curDisplayText = removeSymbol(getText().toString());
             if (!newValue.contentEquals(curDisplayText)) {

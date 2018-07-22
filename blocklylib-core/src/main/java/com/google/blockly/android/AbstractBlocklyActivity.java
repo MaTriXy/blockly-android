@@ -55,20 +55,20 @@ import java.util.List;
  * navigation menu.
  * <p/>
  * The default layout is filled with a workspace and the toolbox and trash each configured as
- * fly-out views.  Everything below the {@link ActionBar} can be replaced by overriding
+ * fly-out views.  Everything below the {@link #mActionBar} can be replaced by overriding
  * {@link #onCreateContentView}. After {@link #onCreateContentView}, a {@link BlocklyActivityHelper}
  * is constructed to help initialize the Blockly fragments, controller, and supporting UI. If
  * overriding {@link #onCreateContentView} without {@code unified_blockly_workspace.xml} or
  * otherwise using standard blockly fragment and view ids ({@link R.id#blockly_workspace},
  * {@link R.id#blockly_toolbox_ui}, {@link R.id#blockly_trash_ui}, etc.), override
- * {@link #onCreateActivityHelper()} and {@link BlocklyActivityHelper#onCreateFragments()}
+ * {@link #onCreateActivityHelper()} and {@link BlocklyActivityHelper#onFindFragments}
  * appropriately.
  * <p/>
  * Once the controller and fragments are configured, if {@link #checkAllowRestoreBlocklyState}
  * returns true, the activity will attempt to load a prior workspace from the instance state
  * bundle.  If no workspace is loaded, it defers to {@link #onLoadInitialWorkspace}.
  * <p/>
- * Configure the workspace by providing definitions for {@link #getBlockDefinitionsJsonPaths()},
+ * Configure the workspace by providing definitions for {@link #getBlockDefinitionsJsonPaths()} and
  * {@link #getToolboxContentsXmlPath()}. Alternate {@link BlockViewFactory}s are supported via
  * {@link BlocklyActivityHelper#onCreateBlockViewFactory}. An initial workspace can be loaded during
  * {@link #onLoadInitialWorkspace()}.
@@ -111,6 +111,12 @@ public abstract class AbstractBlocklyActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * Handles the processing of Blockly's standard toolbar / actionbar menu items for this
+     * workspace.
+     * @param item One of Blockly's standard toolbar / actionbar menu items.
+     * @return True if the item is recognized and the event was consumed. Otherwise false.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -175,7 +181,8 @@ public abstract class AbstractBlocklyActivity extends AppCompatActivity {
 
     /**
      * Called when the user clicks the load action.  Default implementation delegates handling to
-     * {@link BlocklyActivityHelper#loadWorkspaceFromAppDir(String)}.
+     * {@link BlocklyActivityHelper#loadWorkspaceFromAppDir(String)} using
+     * {@link #getWorkspaceSavePath()}.
      */
     public void onLoadWorkspace() {
         mBlocklyActivityHelper.loadWorkspaceFromAppDirSafely(getWorkspaceSavePath());
@@ -260,7 +267,7 @@ public abstract class AbstractBlocklyActivity extends AppCompatActivity {
      * Create a {@link BlocklyActivityHelper} to use for this Activity.
      */
     protected BlocklyActivityHelper onCreateActivityHelper() {
-        return new BlocklyActivityHelper(this);
+        return new BlocklyActivityHelper(this, this.getSupportFragmentManager());
     }
 
     /** Propagate lifecycle event to BlocklyActivityHelper. */
@@ -379,14 +386,14 @@ public abstract class AbstractBlocklyActivity extends AppCompatActivity {
     protected void onInitBlankWorkspace() {}
 
     /**
-     * @return The id of the menu resource used to populate the {@link ActionBar}.
+     * @return The id of the menu resource used to populate the {@link #mActionBar}.
      */
     protected int getActionBarMenuResId() {
         return R.menu.blockly_default_actionbar;
     }
 
     /**
-     * @return The name to show in the {@link ActionBar}.  Defaults to the activity name.
+     * @return The name to show in the {@link #mActionBar}.  Defaults to the activity name.
      */
     @NonNull
     protected CharSequence getWorkspaceTitle() {
@@ -623,7 +630,7 @@ public abstract class AbstractBlocklyActivity extends AppCompatActivity {
     }
 
     /**
-     * Restores the {@link ActionBar} contents when the navigation window closes, per <a
+     * Restores the {@link #mActionBar} contents when the navigation window closes, per <a
      * href="http://developer.android.com/design/material/index.html">Material design
      * guidelines</a>.
      */

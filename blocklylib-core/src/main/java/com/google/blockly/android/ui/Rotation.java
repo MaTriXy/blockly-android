@@ -41,7 +41,7 @@ public final class Rotation {
     /** Rotation flag bit mask for clockwise or counter-clockwise directions. */
     public static final int ROTATION_DIRECTION_MASK = CLOCKWISE | COUNTER_CLOCKWISE;
 
-    /** Rotation flag bit field to mark LTR/RTL aware roations. */
+    /** Rotation flag bit field to mark LTR/RTL aware rotations. */
     public static final int RTL_AWARE_BIT = 0x10;
 
     /** Child is rotated clockwise in LTR, and counter-clockwise in RTL. */
